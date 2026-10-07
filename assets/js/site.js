@@ -73,19 +73,22 @@
     head.className = 'site-head';
     head.innerHTML = `
       <div class="head-in">
-        <a class="brand" href="index.html">
-          ${MARK}
-          <span class="brand-txt">
-            <b>Beane Lab</b>
-            <span>Boston University</span>
-          </span>
-        </a>
-        <nav class="nav" id="nav">
-          ${NAV.map(n => `<a href="${n.href}"${n.key === active ? ' class="on" aria-current="page"' : ''}>${n.label}</a>`).join('')}
-        </nav>
-        <div class="head-tools">
-          <button class="icon-btn" id="themeBtn" type="button"></button>
-          <button class="icon-btn nav-toggle" id="navBtn" type="button" aria-label="Menu" aria-expanded="false">${ICON.menu}</button>
+        <div class="head-top">
+          <a class="brand" href="index.html">
+            <span class="brand-txt">
+              <b>Beane Lab</b>
+              <span>Boston University</span>
+            </span>
+          </a>
+          <div class="head-tools">
+            <button class="icon-btn" id="themeBtn" type="button"></button>
+            <button class="icon-btn nav-toggle" id="navBtn" type="button" aria-label="Menu" aria-expanded="false">${ICON.menu}</button>
+          </div>
+        </div>
+        <div class="head-nav" id="headNav">
+          <nav class="nav">
+            ${NAV.map(n => `<a href="${n.href}"${n.key === active ? ' class="on" aria-current="page"' : ''}>${n.label}</a>`).join('')}
+          </nav>
         </div>
       </div>`;
     document.body.insertBefore(head, document.body.firstChild);
@@ -96,18 +99,11 @@
 
     $('#themeBtn').addEventListener('click', toggleTheme);
     paintThemeBtn();
-    const navBtn = $('#navBtn'), nav = $('#nav');
+    const navBtn = $('#navBtn'), navRow = $('#headNav');
     navBtn.addEventListener('click', () => {
-      const open = nav.classList.toggle('open');
+      const open = navRow.classList.toggle('open');
       navBtn.setAttribute('aria-expanded', String(open));
     });
-
-    let last = 0;
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY;
-      if ((y > 8) !== (last > 8)) head.classList.toggle('stuck', y > 8);
-      last = y;
-    }, { passive: true });
 
     /* footer */
     const links = [
@@ -157,26 +153,36 @@
   }
 
   /* ---------- hero backdrop: the "field of injury" ---------- */
-  function heroBackdrop() {
-    // deterministic pseudo-random so the layout never jumps between loads
-    let s = 20240423;
-    const rnd = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
-    const W = 1200, H = 620, cells = [];
-    for (let i = 0; i < 190; i++) {
+  function fieldPlate() {
+    // deterministic, so the plate never reshuffles between loads
+    let sd = 20240423;
+    const rnd = () => (sd = (sd * 1664525 + 1013904223) % 4294967296) / 4294967296;
+    const W = 560, H = 420, cells = [];
+    for (let i = 0; i < 300; i++) {
       const x = rnd() * W, y = rnd() * H;
-      // damage concentrates toward a focus point — the lesion
-      const d = Math.hypot(x - 880, y - 230) / 620;
+      const d = Math.hypot(x - 388, y - 158) / 300;   // the lesion
       const heat = Math.max(0, 1 - d);
-      cells.push({ x, y, r: 1.1 + rnd() * 3.4 + heat * 2.6, heat: heat * (0.45 + rnd() * 0.55) });
+      cells.push({ x, y, r: 1.2 + rnd() * 2.4 + heat * 3.2, heat: heat * (0.5 + rnd() * 0.5) });
     }
-    // No gradient wash — just a sparse, flat cell field that densifies toward
-    // one focus. Reads as tissue, not as decoration.
     const dots = cells.map(c =>
       `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${c.r.toFixed(2)}" fill="${
-        c.heat > .52 ? 'var(--red)' : 'var(--ink)'}" opacity="${(0.03 + c.heat * 0.17).toFixed(3)}"/>`).join('');
-    return `<div class="hero-bg" aria-hidden="true"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
-      ${dots}
-    </svg></div>`;
+        c.heat > .5 ? 'var(--red)' : 'var(--ink)'}" opacity="${(0.07 + c.heat * 0.5).toFixed(3)}"/>`).join('');
+    return `<figure class="field-plate" style="margin:0">
+      <svg viewBox="0 0 ${W} ${H}" role="img"
+           aria-label="Diagram: cells across the airway lining, with molecular damage densifying toward a premalignant lesion">
+        ${dots}
+        <circle cx="388" cy="158" r="74" fill="none" stroke="var(--red)" stroke-width="1" opacity=".45"/>
+        <circle cx="388" cy="158" r="122" fill="none" stroke="var(--red)" stroke-width="1" opacity=".2"/>
+        <line x1="388" y1="158" x2="470" y2="60" stroke="var(--ink-3)" stroke-width=".8"/>
+        <text x="474" y="56" font-family="var(--font-mono)" font-size="11" fill="var(--ink-3)">lesion</text>
+        <line x1="96" y1="320" x2="150" y2="368" stroke="var(--ink-3)" stroke-width=".8"/>
+        <text x="20" y="384" font-family="var(--font-mono)" font-size="11" fill="var(--ink-3)">normal-appearing</text>
+      </svg>
+      <figcaption class="field-cap">
+        <b>The airway field of injury.</b> Carcinogen exposure alters cells across the
+        entire respiratory lining &mdash; not only where a lesion forms.
+      </figcaption>
+    </figure>`;
   }
 
   /* ---------- shared bits ---------- */
@@ -389,14 +395,18 @@
 
     main.innerHTML = `
       <section class="hero">
-        ${heroBackdrop()}
         <div class="wrap">
-          <span class="eyebrow">Boston University · Computational Biomedicine</span>
-          <h1>${S.tagline}</h1>
-          <p class="hero-lede">${S.heroLede}</p>
-          <div class="hero-cta">
-            <a class="btn btn-primary" href="research.html">Our research ${ICON.arrow}</a>
-            <a class="btn btn-ghost" href="shared.html">Shared projects</a>
+          <div class="hero-grid">
+            <div>
+              <h1>${S.tagline}</h1>
+              <p class="hero-lede">${S.heroLede}</p>
+              <div class="hero-cta">
+                <a class="tlink" href="research.html">Our research</a>
+                <a class="tlink quiet" href="shared.html">Shared projects</a>
+                <a class="tlink quiet" href="papers.html">Papers</a>
+              </div>
+            </div>
+            <div>${fieldPlate()}</div>
           </div>
         </div>
       </section>
