@@ -154,80 +154,84 @@
 
   /* ---------- hero backdrop: the "field of injury" ---------- */
   function fieldPlate() {
-    // Encoding, stated explicitly in the legend:
-    //   colour = cell state (normal vs molecularly altered). Size is constant.
-    // Altered cells are distributed across the WHOLE epithelium at a uniform
-    // rate — not graded toward the lesion. That is the actual finding: the
-    // field is diffuse, which is why a brushing far from any lesion carries
-    // the signal. The lesion is a separate, focal, dense structure.
+    // Three states, stated in the legend. Size is constant and carries no meaning.
+    //   grey  = unaltered
+    //   red   = carcinogen-exposure-associated change, at a uniform rate across
+    //           the WHOLE epithelium (the field) — not graded toward the lesion
+    //   ringed deep red = a lesion cell: it carries the field changes AND further
+    //           lesion-specific ones, so it is drawn as red plus something extra
     let sd = 20240423;
     const rnd = () => (sd = (sd * 1664525 + 1013904223) % 4294967296) / 4294967296;
 
-    const W = 560, H = 420;
-    const R = 3.1;                       // one constant cell radius
+    const W = 560, H = 430;
+    const R = 3.2;
     const LES = { x: 408, y: 116, r: 34 };
     const BRUSH = { x: 122, y: 246, r: 46 };
-    const ALTERED = 0.44;                // uniform across the field
+    const ALTERED = 0.44;
 
     let cells = '', brushN = 0;
     for (let gx = 22; gx <= 540; gx += 25) {
       for (let gy = 22; gy <= 318; gy += 25) {
         const x = gx + (rnd() - .5) * 15, y = gy + (rnd() - .5) * 15;
-        if (Math.hypot(x - LES.x, y - LES.y) < LES.r + 4) continue;  // lesion drawn separately
-        // Inside the brushing circle, force the same ~44% rate deterministically so a
-        // random draw can't accidentally depict that site as unaffected.
+        if (Math.hypot(x - LES.x, y - LES.y) < LES.r + 4) continue;
+        // force the brushing site to a representative rate so a random draw
+        // cannot accidentally depict that site as unaffected
         const inBrush = Math.hypot(x - BRUSH.x, y - BRUSH.y) < BRUSH.r;
         const altered = inBrush ? (brushN++ % 9) < 4 : rnd() < ALTERED;
         cells += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R}" fill="${
-          altered ? 'var(--red)' : 'var(--ink-4)'}" opacity="${altered ? '.72' : '.42'}"/>`;
+          altered ? 'var(--red)' : 'var(--ink-4)'}" opacity="${altered ? '.75' : '.4'}"/>`;
       }
     }
 
-    // the lesion: a dense focal cluster, every cell altered
     let lesion = '';
-    for (let i = 0; i < 46; i++) {
+    for (let i = 0; i < 44; i++) {
       const ang = rnd() * Math.PI * 2, rad = Math.sqrt(rnd()) * LES.r;
       lesion += `<circle cx="${(LES.x + Math.cos(ang) * rad).toFixed(1)}" cy="${
-        (LES.y + Math.sin(ang) * rad).toFixed(1)}" r="${R}" fill="var(--red)" opacity=".95"/>`;
+        (LES.y + Math.sin(ang) * rad).toFixed(1)}" r="${R}" fill="var(--red-deep)"
+        stroke="var(--ink)" stroke-width="1"/>`;
     }
+
+    const halo = 'stroke="var(--card)" stroke-width="3.5" paint-order="stroke"';
 
     return `<figure class="field-plate" style="margin:0">
       <svg viewBox="0 0 ${W} ${H}" role="img"
-           aria-label="Diagram of the airway lining. Molecularly altered cells, shown in red, are scattered evenly across the whole epithelium rather than clustering near the lesion. A focal lesion sits at upper right; a bronchial brushing site at lower left, far from it, still contains altered cells.">
+           aria-label="Diagram of the airway lining. Cells with carcinogen-exposure-associated changes, in red, are spread evenly across the whole epithelium rather than clustering near the lesion. A focal lesion at upper right contains cells carrying further lesion-specific changes. A bronchial brushing site at lower left, far from the lesion, still contains exposure-altered cells.">
         ${cells}
         ${lesion}
 
         <circle cx="${LES.x}" cy="${LES.y}" r="${LES.r + 13}" fill="none"
                 stroke="var(--red)" stroke-width="1.1" opacity=".75"/>
-        <line x1="${LES.x + 36}" y1="${LES.y - 36}" x2="494" y2="44"
+        <line x1="${LES.x + 36}" y1="${LES.y - 36}" x2="492" y2="44"
               stroke="var(--ink-3)" stroke-width=".8"/>
-        <text x="498" y="41" font-family="var(--font-mono)" font-size="10.5" fill="var(--ink-2)"
-              text-anchor="end" transform="translate(44,0)"
-              stroke="var(--card)" stroke-width="3.5" paint-order="stroke">lesion</text>
+        <text x="538" y="41" font-family="var(--font-mono)" font-size="10.5"
+              fill="var(--ink-2)" text-anchor="end" ${halo}>lesion</text>
 
         <circle cx="${BRUSH.x}" cy="${BRUSH.y}" r="${BRUSH.r}" fill="none"
                 stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 3"/>
         <text x="${BRUSH.x}" y="${BRUSH.y + BRUSH.r + 18}" font-family="var(--font-mono)"
-              font-size="10.5" fill="var(--ink-2)" text-anchor="middle"
-              stroke="var(--card)" stroke-width="3.5" paint-order="stroke">brushing site</text>
+              font-size="10.5" fill="var(--ink-2)" text-anchor="middle" ${halo}>brushing site</text>
         <text x="${BRUSH.x}" y="${BRUSH.y + BRUSH.r + 31}" font-family="var(--font-mono)"
-              font-size="9.5" fill="var(--ink-3)" text-anchor="middle"
-              stroke="var(--card)" stroke-width="3.5" paint-order="stroke">normal-appearing</text>
+              font-size="9.5" fill="var(--ink-3)" text-anchor="middle" ${halo}>normal-appearing</text>
 
-        <line x1="22" y1="358" x2="538" y2="358" stroke="var(--rule-2)" stroke-width="1"/>
-        <circle cx="28" cy="383" r="${R}" fill="var(--ink-4)" opacity=".42"/>
-        <text x="40" y="387" font-family="var(--font-mono)" font-size="10"
-              fill="var(--ink-3)">unaltered cell</text>
-        <circle cx="166" cy="383" r="${R}" fill="var(--red)" opacity=".72"/>
-        <text x="178" y="387" font-family="var(--font-mono)" font-size="10"
-              fill="var(--ink-3)">molecularly altered cell</text>
-        <text x="538" y="387" font-family="var(--font-mono)" font-size="9.5"
+        <line x1="22" y1="356" x2="538" y2="356" stroke="var(--rule-2)" stroke-width="1"/>
+
+        <circle cx="28" cy="380" r="${R}" fill="var(--ink-4)" opacity=".4"/>
+        <text x="40" y="384" font-family="var(--font-mono)" font-size="9.5"
+              fill="var(--ink-3)">unaltered</text>
+        <circle cx="122" cy="380" r="${R}" fill="var(--red)" opacity=".75"/>
+        <text x="134" y="384" font-family="var(--font-mono)" font-size="9.5"
+              fill="var(--ink-3)">exposure-altered</text>
+        <circle cx="272" cy="380" r="${R}" fill="var(--red-deep)" stroke="var(--ink)" stroke-width="1"/>
+        <text x="284" y="384" font-family="var(--font-mono)" font-size="9.5"
+              fill="var(--ink-3)">+ lesion-specific change</text>
+        <text x="538" y="384" font-family="var(--font-mono)" font-size="9.5"
               fill="var(--ink-4)" text-anchor="end">schematic</text>
       </svg>
       <figcaption class="field-cap">
-        <b>The airway field of injury.</b> Altered cells are spread across the entire
-        respiratory lining at a similar rate everywhere &mdash; not concentrated around
-        the lesion. That is why a brushing taken far from any lesion still carries the signal.
+        <b>The airway field of injury.</b> Carcinogen exposure alters cells across the
+        entire respiratory lining at a similar rate everywhere &mdash; which is why a
+        brushing taken far from any lesion carries the signal. Within a lesion, those
+        cells carry further changes of their own.
       </figcaption>
     </figure>`;
   }
