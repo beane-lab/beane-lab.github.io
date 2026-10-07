@@ -237,6 +237,12 @@ window.NEWS = [
     link: 'https://als.longitudeprize.org'
   },
   {
+    d: '2026-04-10', tag: 'Event',
+    t: 'Hosting the 2026 MedAI Hackathon',
+    b: 'With Vijaya Kolachalama, the lab hosted the <a href="https://medaihack.org" target="_blank" rel="noopener">MedAI Hackathon</a> on April 10&ndash;11, 2026: 233 students across 30 teams, competing for $10,000 in prizes. Teams came from Computing &amp; Data Sciences, the Chobanian &amp; Avedisian School of Medicine, Questrom, and programs in public health, engineering, dentistry, and arts and sciences, and took on three genuine clinical problems &mdash; early lung cancer detection from pathology images, Alzheimer\'s disease marker quantification from brain scans, and kidney injury prediction from blood-based molecular data. The weekend ran close to 10,000 compute jobs across more than 40 GPUs. The aim, as the organizers put it, was to &ldquo;build an intensive, fun, educational, and impactful experience where multidisciplinary teams could tackle genuine clinical problems.&rdquo;',
+    link: 'https://www.bu.edu/cds-faculty/2026/04/28/2026-medai-hackathon/'
+  },
+  {
     d: '2026-04-08', tag: 'Paper',
     t: 'Multimodal deep learning grades premalignant lesions — even with a missing modality',
     b: 'Lingyi Xu\'s paper in <em>Genome Medicine</em> describes a transformer framework that combines whole-slide images with bulk gene expression to classify bronchial dysplasia, reaching an external AUROC of 0.954 with both modalities and still producing a prediction when only one is available. Work with the Kolachalama lab.',

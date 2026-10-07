@@ -707,7 +707,7 @@
     const d = new Date(n.d + 'T12:00:00');
     const fmt = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const upcoming = d > new Date();
-    return `<article class="news-item rv">
+    return `<article class="news-item">
       <div class="news-when">
         <span class="news-date">${fmt}</span>
         ${upcoming ? '<span class="news-tag is-upcoming">Upcoming</span>' : ''}
