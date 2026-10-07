@@ -24,8 +24,6 @@
     ext:   '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M10 3h3v3M13 3L7 9"/></svg>',
     chev:  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>',
     search:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>',
-    sun:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10" cy="10" r="3.6"/><path d="M10 2v1.6M10 16.4V18M18 10h-1.6M3.6 10H2M15.7 4.3l-1.1 1.1M5.4 14.6l-1.1 1.1M15.7 15.7l-1.1-1.1M5.4 5.4L4.3 4.3"/></svg>',
-    moon:  '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 11.8A7 7 0 018.2 3.5a7 7 0 108.3 8.3z"/></svg>',
     menu:  '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h14M3 10h14M3 14h14"/></svg>'
   };
 
@@ -37,33 +35,6 @@
     <circle cx="9.5" cy="27.5" r="1.9" fill="var(--red)" opacity=".5"/>
     <circle cx="28" cy="30" r="1.6" fill="var(--red)" opacity=".4"/>
   </svg>`;
-
-  /* ---------- theme ---------- */
-  function initTheme() {
-    let saved = null;
-    try { saved = localStorage.getItem('beane-theme'); } catch (e) {}
-    if (saved === 'dark' || saved === 'light') {
-      document.documentElement.setAttribute('data-theme', saved);
-    }
-  }
-  function toggleTheme() {
-    const cur = document.documentElement.getAttribute('data-theme');
-    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = cur ? cur === 'dark' : sysDark;
-    const next = isDark ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    try { localStorage.setItem('beane-theme', next); } catch (e) {}
-    paintThemeBtn();
-  }
-  function paintThemeBtn() {
-    const b = $('#themeBtn'); if (!b) return;
-    const cur = document.documentElement.getAttribute('data-theme');
-    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = cur ? cur === 'dark' : sysDark;
-    b.innerHTML = isDark ? ICON.sun : ICON.moon;
-    b.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
-  }
-  initTheme();
 
   /* ---------- chrome ---------- */
   function mountChrome(active) {
@@ -81,7 +52,6 @@
             </span>
           </a>
           <div class="head-tools">
-            <button class="icon-btn" id="themeBtn" type="button"></button>
             <button class="icon-btn nav-toggle" id="navBtn" type="button" aria-label="Menu" aria-expanded="false">${ICON.menu}</button>
           </div>
         </div>
@@ -97,8 +67,6 @@
     skip.className = 'skip'; skip.href = '#main'; skip.textContent = 'Skip to content';
     document.body.insertBefore(skip, head);
 
-    $('#themeBtn').addEventListener('click', toggleTheme);
-    paintThemeBtn();
     const navBtn = $('#navBtn'), navRow = $('#headNav');
     navBtn.addEventListener('click', () => {
       const open = navRow.classList.toggle('open');
@@ -154,28 +122,29 @@
 
   /* ---------- hero backdrop: the "field of injury" ---------- */
   function fieldPlate() {
-    // Three states, stated in the legend. Size is constant and carries no meaning.
-    //   grey  = unaltered
-    //   red   = carcinogen-exposure-associated change, at a uniform rate across
-    //           the WHOLE epithelium (the field) — not graded toward the lesion
-    //   ringed deep red = a lesion cell: it carries the field changes AND further
-    //           lesion-specific ones, so it is drawn as red plus something extra
+    // Two things in one plate, kept visually separate:
+    //   TOP  — space: where alteration sits across the epithelium at one moment.
+    //          grey = unaltered; red = carcinogen-exposure-associated change, at a
+    //          uniform rate across the WHOLE lining (not graded toward the lesion);
+    //          ringed deep red = a lesion cell, carrying the field changes AND
+    //          further lesion-specific ones.
+    //   LOWER — time: a lesion is not a one-way street. It can progress in grade
+    //          and on to invasive cancer, or regress toward normal epithelium.
+    //          Only the step into invasion is drawn as one-way.
     let sd = 20240423;
     const rnd = () => (sd = (sd * 1664525 + 1013904223) % 4294967296) / 4294967296;
 
-    const W = 560, H = 430;
+    const W = 560, H = 486;
     const R = 3.2;
-    const LES = { x: 408, y: 116, r: 34 };
-    const BRUSH = { x: 122, y: 246, r: 46 };
+    const LES = { x: 408, y: 112, r: 33 };
+    const BRUSH = { x: 122, y: 228, r: 44 };
     const ALTERED = 0.44;
 
     let cells = '', brushN = 0;
     for (let gx = 22; gx <= 540; gx += 25) {
-      for (let gy = 22; gy <= 318; gy += 25) {
+      for (let gy = 20; gy <= 286; gy += 25) {
         const x = gx + (rnd() - .5) * 15, y = gy + (rnd() - .5) * 15;
         if (Math.hypot(x - LES.x, y - LES.y) < LES.r + 4) continue;
-        // force the brushing site to a representative rate so a random draw
-        // cannot accidentally depict that site as unaffected
         const inBrush = Math.hypot(x - BRUSH.x, y - BRUSH.y) < BRUSH.r;
         const altered = inBrush ? (brushN++ % 9) < 4 : rnd() < ALTERED;
         cells += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R}" fill="${
@@ -184,7 +153,7 @@
     }
 
     let lesion = '';
-    for (let i = 0; i < 44; i++) {
+    for (let i = 0; i < 42; i++) {
       const ang = rnd() * Math.PI * 2, rad = Math.sqrt(rnd()) * LES.r;
       lesion += `<circle cx="${(LES.x + Math.cos(ang) * rad).toFixed(1)}" cy="${
         (LES.y + Math.sin(ang) * rad).toFixed(1)}" r="${R}" fill="var(--red-deep)"
@@ -193,45 +162,84 @@
 
     const halo = 'stroke="var(--card)" stroke-width="3.5" paint-order="stroke"';
 
+    /* ---- fate band ---- */
+    const NY = 404, NR = 11;
+    const stages = [
+      { x: 70,  label: 'normal',      fill: 'var(--ink-4)',   op: '.4',  sw: 0 },
+      { x: 207, label: 'low grade',   fill: 'var(--red)',     op: '.6',  sw: 0 },
+      { x: 344, label: 'high grade',  fill: 'var(--red-deep)', op: '1',  sw: 1 },
+      { x: 481, label: 'invasive',    fill: 'var(--red-deep)', op: '1',  sw: 1.6 }
+    ];
+    const nodes = stages.map(st => `
+      <circle cx="${st.x}" cy="${NY}" r="${NR}" fill="${st.fill}" opacity="${st.op}"
+        ${st.sw ? `stroke="var(--ink)" stroke-width="${st.sw}"` : ''}/>
+      ${st.label === 'invasive' ? `<circle cx="${st.x}" cy="${NY}" r="${NR + 5}" fill="none"
+        stroke="var(--red)" stroke-width="1" opacity=".6"/>` : ''}
+      <text x="${st.x}" y="${NY + 40}" font-family="var(--font-mono)" font-size="9.5"
+        fill="var(--ink-3)" text-anchor="middle">${st.label}</text>`).join('');
+
+    let arrows = '';
+    for (let i = 0; i < 3; i++) {
+      const x1 = stages[i].x + NR + 7, x2 = stages[i + 1].x - NR - 7;
+      arrows += `<line x1="${x1}" y1="${NY - 16}" x2="${x2}" y2="${NY - 16}"
+        stroke="var(--ink-3)" stroke-width="1" marker-end="url(#arw)"/>`;
+      if (i < 2) {   // only the step into invasion is one-way
+        arrows += `<line x1="${x2}" y1="${NY + 16}" x2="${x1}" y2="${NY + 16}"
+          stroke="var(--ink-3)" stroke-width="1" marker-end="url(#arw)"/>`;
+      }
+    }
+
     return `<figure class="field-plate" style="margin:0">
       <svg viewBox="0 0 ${W} ${H}" role="img"
-           aria-label="Diagram of the airway lining. Cells with carcinogen-exposure-associated changes, in red, are spread evenly across the whole epithelium rather than clustering near the lesion. A focal lesion at upper right contains cells carrying further lesion-specific changes. A bronchial brushing site at lower left, far from the lesion, still contains exposure-altered cells.">
+           aria-label="Two-part diagram. Above: cells with carcinogen-exposure-associated changes, in red, spread evenly across the whole airway lining rather than clustering near the lesion; a focal lesion at upper right holds cells with further lesion-specific changes; a brushing site at lower left, far from the lesion, still contains altered cells. Below: a lesion's possible fates — normal epithelium, low grade, and high grade connected by arrows in both directions, with a one-way arrow from high grade to invasive cancer.">
+        <defs>
+          <marker id="arw" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6"
+                  markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L7,4 L0,7 Z" fill="var(--ink-3)"/>
+          </marker>
+        </defs>
+
         ${cells}
         ${lesion}
 
         <circle cx="${LES.x}" cy="${LES.y}" r="${LES.r + 13}" fill="none"
                 stroke="var(--red)" stroke-width="1.1" opacity=".75"/>
-        <line x1="${LES.x + 36}" y1="${LES.y - 36}" x2="492" y2="44"
+        <line x1="${LES.x + 34}" y1="${LES.y - 34}" x2="492" y2="42"
               stroke="var(--ink-3)" stroke-width=".8"/>
-        <text x="538" y="41" font-family="var(--font-mono)" font-size="10.5"
+        <text x="538" y="39" font-family="var(--font-mono)" font-size="10.5"
               fill="var(--ink-2)" text-anchor="end" ${halo}>lesion</text>
 
         <circle cx="${BRUSH.x}" cy="${BRUSH.y}" r="${BRUSH.r}" fill="none"
                 stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 3"/>
-        <text x="${BRUSH.x}" y="${BRUSH.y + BRUSH.r + 18}" font-family="var(--font-mono)"
+        <text x="${BRUSH.x}" y="${BRUSH.y + BRUSH.r + 17}" font-family="var(--font-mono)"
               font-size="10.5" fill="var(--ink-2)" text-anchor="middle" ${halo}>brushing site</text>
-        <text x="${BRUSH.x}" y="${BRUSH.y + BRUSH.r + 31}" font-family="var(--font-mono)"
+        <text x="${BRUSH.x}" y="${BRUSH.y + BRUSH.r + 30}" font-family="var(--font-mono)"
               font-size="9.5" fill="var(--ink-3)" text-anchor="middle" ${halo}>normal-appearing</text>
 
-        <line x1="22" y1="356" x2="538" y2="356" stroke="var(--rule-2)" stroke-width="1"/>
-
-        <circle cx="28" cy="380" r="${R}" fill="var(--ink-4)" opacity=".4"/>
-        <text x="40" y="384" font-family="var(--font-mono)" font-size="9.5"
-              fill="var(--ink-3)">unaltered</text>
-        <circle cx="122" cy="380" r="${R}" fill="var(--red)" opacity=".75"/>
-        <text x="134" y="384" font-family="var(--font-mono)" font-size="9.5"
-              fill="var(--ink-3)">exposure-altered</text>
-        <circle cx="272" cy="380" r="${R}" fill="var(--red-deep)" stroke="var(--ink)" stroke-width="1"/>
-        <text x="284" y="384" font-family="var(--font-mono)" font-size="9.5"
-              fill="var(--ink-3)">+ lesion-specific change</text>
-        <text x="538" y="384" font-family="var(--font-mono)" font-size="9.5"
+        <line x1="22" y1="322" x2="538" y2="322" stroke="var(--rule-2)" stroke-width="1"/>
+        <text x="22" y="344" font-family="var(--font-mono)" font-size="9.5"
+              fill="var(--ink-4)" letter-spacing="1.4">WHAT BECOMES OF A LESION</text>
+        <text x="538" y="344" font-family="var(--font-mono)" font-size="9.5"
               fill="var(--ink-4)" text-anchor="end">schematic</text>
+
+        <text x="70" y="${NY - 26}" font-family="var(--font-mono)" font-size="9"
+              fill="var(--ink-4)">progresses</text>
+        <text x="70" y="${NY + 28}" font-family="var(--font-mono)" font-size="9"
+              fill="var(--ink-4)">regresses</text>
+        ${arrows}
+        ${nodes}
       </svg>
       <figcaption class="field-cap">
+        <span class="field-key">
+          <i><b style="background:var(--ink-4);opacity:.5"></b>unaltered</i>
+          <i><b style="background:var(--red)"></b>exposure-altered</i>
+          <i><b style="background:var(--red-deep);border:1px solid var(--ink)"></b>+ lesion-specific</i>
+        </span>
         <b>The airway field of injury.</b> Carcinogen exposure alters cells across the
         entire respiratory lining at a similar rate everywhere &mdash; which is why a
-        brushing taken far from any lesion carries the signal. Within a lesion, those
-        cells carry further changes of their own.
+        brushing taken far from any lesion carries the signal. Lesion cells carry further
+        changes of their own, and a lesion may grow more severe and become invasive, or
+        regress toward normal epithelium. Which way it goes is the question we work on.
       </figcaption>
     </figure>`;
   }
