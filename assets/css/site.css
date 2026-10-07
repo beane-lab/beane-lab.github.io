@@ -185,11 +185,11 @@ p { margin: 0 0 1em; }
 .field-plate { border: 1px solid var(--ink); background: var(--card); }
 .field-plate svg { display: block; width: 100%; height: auto; }
 .field-cap {
-  border-top: 1px solid var(--rule); padding: 11px 14px;
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: .07em;
-  color: var(--ink-3); line-height: 1.6; text-transform: uppercase;
+  border-top: 1px solid var(--rule); padding: 13px 16px 15px;
+  font-family: var(--font-body); font-size: 12.6px;
+  color: var(--ink-3); line-height: 1.62;
 }
-.field-cap b { color: var(--ink-2); font-weight: 500; }
+.field-cap b { color: var(--ink-2); font-weight: 600; }
 
 /* ============================================================
    SECTIONS
@@ -760,5 +760,7 @@ p { margin: 0 0 1em; }
 
 /* key for the field plate, in the caption rather than the drawing */
 .field-key { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 9px; }
-.field-key i { display: inline-flex; align-items: center; gap: 6px; font-style: normal; }
+.field-key i { display: inline-flex; align-items: center; gap: 6px; font-style: normal;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-4); }
 .field-key b { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }

@@ -235,11 +235,12 @@
           <i><b style="background:var(--red)"></b>exposure-altered</i>
           <i><b style="background:var(--red-deep);border:1px solid var(--ink)"></b>+ lesion-specific</i>
         </span>
-        <b>The airway field of injury.</b> Carcinogen exposure alters cells across the
-        entire respiratory lining at a similar rate everywhere &mdash; which is why a
-        brushing taken far from any lesion carries the signal. Lesion cells carry further
-        changes of their own, and a lesion may grow more severe and become invasive, or
-        regress toward normal epithelium. Which way it goes is the question we work on.
+        Carcinogen exposure alters cells across the entire respiratory lining, and it's
+        the aberrant response to the exposure that is associated with the presence of
+        lung cancer. Premalignant lesions develop within the <b>airway field of injury</b>
+        and carry further changes of their own. Lesions may grow more severe and become
+        invasive, or regress toward normal epithelium. Which way it goes is one of the
+        questions we work on.
       </figcaption>
     </figure>`;
   }
